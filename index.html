@@ -9,7 +9,6 @@ Everything you need to change is in one place: open `index.html`, search for `CO
 | Setting | What to put |
 |—-|—-|
 | `phone1`, `phone2` | Calling numbers, without +977 |
-| `whatsapp` | WhatsApp-only number, without +977 |
 | `mapLink` | Google Maps link for the office |
 | `office` | Office address shown on the page and in Google Maps |
 | `facebook`, `instagram` | Already filled in |
@@ -181,20 +180,24 @@ button{font:inherit;cursor:pointer}
 
 /* contact options under the intro */
 .hero .quick-wrap{position:relative;display:block;padding:8px 0 72px}
-.quick-title{font-size:16px;font-weight:600;color:#CBBFF0;margin:0 0 14px}
-.quick{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.quick a{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:var(--r-md);text-decoration:none;color:#fff;background:rgba(255,255,255,.07);border:1px solid rgba(255,200,69,.18);transition:background .15s,border-color .15s;min-width:0}
-.quick a:hover{background:rgba(255,255,255,.13);border-color:rgba(255,200,69,.45)}
-.quick .ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;flex:0 0 44px}
-.quick .ic svg{width:22px;height:22px}
+.quick-title{font-size:16px;font-weight:600;color:#CBBFF0;margin:0 0 18px;text-align:center}
+.quick{display:flex;flex-wrap:wrap;justify-content:center;gap:18px}
+.quick a{position:relative;flex:0 1 210px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:22px 16px 18px;border-radius:24px;text-decoration:none;color:#fff;
+  background:linear-gradient(160deg,rgba(255,255,255,.12),rgba(255,255,255,.04));border:1px solid rgba(255,200,69,.28);box-shadow:0 18px 36px -18px rgba(0,0,0,.6);
+  animation:bob 5s ease-in-out infinite;transition:border-color .2s,box-shadow .2s}
+.quick a:nth-child(2){animation-delay:-1.2s}.quick a:nth-child(3){animation-delay:-2.4s}.quick a:nth-child(4){animation-delay:-3.6s}.quick a:nth-child(5){animation-delay:-.6s}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.quick a:hover{animation-play-state:paused;border-color:var(--marigold);box-shadow:0 22px 44px -16px rgba(0,0,0,.7),0 0 30px rgba(255,200,69,.25)}
+.quick a:active{transform:scale(.96)}
+.quick .ic{width:60px;height:60px;border-radius:50%;display:grid;place-items:center;box-shadow:0 10px 22px -8px rgba(0,0,0,.6),0 0 0 6px rgba(255,255,255,.06)}
+.quick .ic svg{width:28px;height:28px}
 .ic-phone{background:linear-gradient(135deg,#22B35E,#2F7A48)}
 .ic-fb{background:#1877F2}
 .ic-ig{background:linear-gradient(45deg,#FEDA75,#FA7E1E,#D62976,#962FBF,#4F5BD5)}
-.quick b{display:block;font-weight:600;font-size:16px;line-height:1.25}
-.quick small{display:block;color:#CBBFF0;font-size:14px;line-height:1.3}
-.quick .go{margin-left:auto;opacity:.6}
-@media (max-width:900px){.quick{grid-template-columns:1fr 1fr}.quick-title{text-align:center}}
-@media (max-width:560px){.quick{grid-template-columns:1fr}.hero .quick-wrap{padding-bottom:56px}}
+.quick b{display:block;font-weight:700;font-size:17px;line-height:1.25}
+.quick small{display:block;color:#CBBFF0;font-size:14px;line-height:1.3;margin-top:2px}
+.quick .go{display:none}
+@media (max-width:560px){.quick{gap:12px}.quick a{flex:1 1 calc(50% - 6px);padding:18px 10px 14px}.quick .ic{width:52px;height:52px}.quick b{font-size:15px}.quick small{font-size:13px}.hero .quick-wrap{padding-bottom:56px}}
 @media (max-width:900px){
   .hero .wrap{grid-template-columns:1fr;grid-template-areas:"photo" "copy";padding:36px 0 32px;row-gap:44px}
   .stage{width:min(340px,86%)}
@@ -247,7 +250,6 @@ section{padding:88px 0}
 .tags span{padding:6px 14px;border-radius:999px;font-size:15px;font-weight:600;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18)}
 .btn-wa{background:#25D366;color:#073B1C}
 .btn-wa:hover{background:#1FBE5B}
-.js-wa.soon{opacity:.55;cursor:default;pointer-events:none}
 .lightbox{position:fixed;inset:0;z-index:110;background:rgba(10,6,30,.92);display:grid;place-items:center;padding:20px}
 .lightbox img{max-width:100%;max-height:100%;border-radius:12px}
 .lightbox button{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));right:16px;width:46px;height:46px;border-radius:50%;border:0;background:#fff;font-size:24px;color:var(--night)}
@@ -484,10 +486,6 @@ footer{padding-bottom:130px}
           <span class="ic ic-phone"><svg viewBox="0 0 24 24" fill="#fff"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></span>
           <span><b class="js-num2"></b><small>Tap to call</small></span><span class="go">↗</span>
         </a>
-        <a class="js-wa" href="#" target="_blank" rel="noopener">
-          <span class="ic" style="background:#25D366"><svg viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.3-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.6-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.7.5-.1 1.5-.6 1.7-1.2s.2-1.1.2-1.2-.2-.2-.4-.3z"/></svg></span>
-          <span><b class="js-wanum"></b><small>Chat on WhatsApp</small></span><span class="go">↗</span>
-        </a>
         <a class="js-fb" href="#" target="_blank" rel="noopener">
           <span class="ic ic-fb"><svg viewBox="0 0 24 24" fill="#fff"><path d="M14 8h3V4h-3c-2.8 0-4.5 1.8-4.5 4.6V11H7v4h2.5v9h4v-9h3l.5-4h-3.5V9c0-.6.4-1 1-1z"/></svg></span>
           <span><b>Facebook</b><small>Open his profile</small></span><span class="go">↗</span>
@@ -679,7 +677,6 @@ footer{padding-bottom:130px}
     <div>
       <p>📞 <a class="js-call1" href="#"><span class="js-num1"></span></a></p>
       <p>📞 <a class="js-call2" href="#"><span class="js-num2"></span></a></p>
-      <p>💬 <a class="js-wa" href="#" target="_blank" rel="noopener">WhatsApp <span class="js-wanum"></span></a></p>
     </div>
     <p class="copy">© <span id="yr"></span> Jyotish Paramarsha Sewa</p>
   </div>
@@ -687,7 +684,6 @@ footer{padding-bottom:130px}
 
 <nav class="dock" aria-label="Quick actions">
   <a class="js-call1" href="#" style="--c:#22B35E"><span class="d-ic"><svg viewBox="0 0 24 24" fill="#fff"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></span><span class="d-lb">Call</span></a>
-  <a class="js-wa" href="#" target="_blank" rel="noopener" style="--c:#25D366"><span class="d-ic"><svg viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm4.5 12.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.6-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.7.5-.1 1.5-.6 1.7-1.2s.2-1.1.2-1.2-.2-.2-.4-.3z"/></svg></span><span class="d-lb">WhatsApp</span></a>
   <a class="js-fb" href="#" target="_blank" rel="noopener" style="--c:#1877F2"><span class="d-ic"><svg viewBox="0 0 24 24" fill="#fff"><path d="M14 8h3V4h-3c-2.8 0-4.5 1.8-4.5 4.6V11H7v4h2.5v9h4v-9h3l.5-4h-3.5V9c0-.6.4-1 1-1z"/></svg></span><span class="d-lb">Facebook</span></a>
   <a class="js-ig" href="#" target="_blank" rel="noopener" style="--c:linear-gradient(45deg,#FEDA75,#FA7E1E,#D62976,#962FBF,#4F5BD5)"><span class="d-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="#fff"/></svg></span><span class="d-lb">Instagram</span></a>
   <a class="js-map" href="#" target="_blank" rel="noopener" style="--c:linear-gradient(135deg,#F29A2E,#D4213D)"><span class="d-ic"><svg viewBox="0 0 24 24" fill="#fff"><path d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg></span><span class="d-lb">Map</span></a>
@@ -2679,7 +2675,6 @@ const CONFIG = {
   phone1: "9814044138",   // tap-to-call number
   phone2: "",             // optional second call number (leave "" to hide)
   phoneCountry: "+977",
-  whatsapp: "9824679233",  // WhatsApp only (not for calls)
   office: "Bhadrapur Road (bus stand), Birtamode",
   mapLink: "https://share.google/bjRQlL3G8nNDSAMin",   // Google Maps location
   facebook: "https://www.facebook.com/jyotishchetanoli",
@@ -2719,16 +2714,6 @@ const PHONES = [CONFIG.phone1, CONFIG.phone2].filter(Boolean).join(", ");
 $$(".js-phones").forEach(e => e.textContent = PHONES);
 function wireSocial(sel, url){ $$(sel).forEach(a => { if (url) a.href = url; else { a.removeAttribute("target"); a.href = "#contact"; a.querySelector("small").textContent = "Link coming soon"; } }); }
 wireSocial(".js-fb", CONFIG.facebook);
-if (CONFIG.whatsapp){
-  $$(".js-wa").forEach(a => a.href = `https://wa.me/${CONFIG.phoneCountry.replace("+","")}${CONFIG.whatsapp}`);
-  $$(".js-wanum").forEach(e => e.textContent = CONFIG.whatsapp);
-} else {
-  $$(".js-wa").forEach(a => { a.removeAttribute("href"); a.removeAttribute("target"); a.setAttribute("aria-disabled","true"); a.classList.add("soon"); });
-  $$(".js-wanum").forEach(e => e.textContent = "WhatsApp");
-  $$(".quick .js-wa small").forEach(e => e.textContent = "Coming soon");
-  $$(".btn.js-wa").forEach(e => e.textContent = "WhatsApp coming soon");
-  $$("footer .js-wa").forEach(e => e.closest("p").remove());
-}
 $$(".js-office").forEach(e => e.textContent = CONFIG.office);
 $("#posterBtn").onclick = () => { $("#lightbox").hidden = false; $("#lbClose").focus(); };
 $("#lbClose").onclick = () => { $("#lightbox").hidden = true; $("#posterBtn").focus(); };

@@ -24,7 +24,6 @@ All settings are in one block called `CONFIG`, near the bottom of `index.html`.
 |---|---|---|
 | `phone1` | Tap-to-call number, without +977 | 9814044138 |
 | `phone2` | Optional second call number (leave `""` to hide) | Empty |
-| `whatsapp` | WhatsApp-only number | 9824679233 |
 | `office`, `mapLink` | Office address and Google Maps link | Set |
 | `facebook`, `instagram` | Profile links | Set |
 | `zoomLink` | His Zoom meeting link | Coming soon |
