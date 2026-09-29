@@ -8,7 +8,9 @@ Everything you need to change is in one place: open `index.html`, search for `CO
 
 | Setting | What to put |
 |—-|—-|
-| `phone1`, `phone2`, `whatsapp` | Phone and WhatsApp numbers, without +977 |
+| `phone1`, `phone2` | Calling numbers, without +977 |
+| `whatsapp` | WhatsApp-only number, without +977 |
+| `mapLink` | Google Maps link for the office |
 | `office` | Office address shown on the page and in Google Maps |
 | `facebook`, `instagram` | Already filled in |
 | `zoomLink` | His personal Zoom meeting link (use a recurring or Personal Meeting ID link) |
@@ -2657,10 +2659,11 @@ footer .copy{width:100%;border-top:1px solid rgba(255,255,255,.1);padding-top:18
    ===================================================================== */
 const CONFIG = {
   phone1: "9824036543",
-  phone2: "9842679233",
+  phone2: "9814044138",
   phoneCountry: "+977",
-  whatsapp: "",            // coming soon, e.g. "9814044138"
+  whatsapp: "9824679233",  // WhatsApp only (not for calls)
   office: "Bhadrapur Road (bus stand), Birtamode",
+  mapLink: "https://share.google/bjRQlL3G8nNDSAMin",   // Google Maps location
   facebook: "https://www.facebook.com/jyotishchetanoli",
   instagram: "https://www.instagram.com/jyotish_sathi",
   zoomLink: "",            // e.g. "https://us05web.zoom.us/j/1234567890?pwd=..."
@@ -2709,7 +2712,7 @@ $$(".js-office").forEach(e => e.textContent = CONFIG.office);
 $("#posterBtn").onclick = () => { $("#lightbox").hidden = false; $("#lbClose").focus(); };
 $("#lbClose").onclick = () => { $("#lightbox").hidden = true; $("#posterBtn").focus(); };
 $("#lightbox").addEventListener("click", e => { if (e.target.id === "lightbox") $("#lightbox").hidden = true; });
-$$(".js-map").forEach(a => a.href = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(CONFIG.office + ", Nepal"));
+$$(".js-map").forEach(a => a.href = CONFIG.mapLink || ("https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(CONFIG.office + ", Nepal")));
 wireSocial(".js-ig", CONFIG.instagram);
 $("#yr").textContent = new Date().getFullYear();
 
