@@ -376,11 +376,25 @@ footer b{color:#fff;font-family:var(--display);font-weight:400;font-size:22px}
 footer a{color:var(--marigold);text-decoration:none}
 footer .copy{width:100%;border-top:1px solid rgba(255,255,255,.1);padding-top:18px;font-size:14px}
 
-.callbar{display:none}
-@media (max-width:700px){
-  .callbar{display:flex;position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:50;gap:8px}
-  .callbar a{flex:1;justify-content:center}
-  footer{padding-bottom:110px}
+/* floating quick-action dock (all screens) */
+.dock{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:60;display:flex;gap:6px;padding:8px;border-radius:24px;
+  background:rgba(30,22,80,.88);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,200,69,.3);box-shadow:0 18px 40px -12px rgba(0,0,0,.55);animation:dockIn .6s ease both}
+@keyframes dockIn{from{transform:translate(-50%,30px);opacity:0}}
+.dock a{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:64px;padding:4px 6px;border-radius:16px;text-decoration:none;color:#fff;transition:transform .15s}
+.dock a:hover{transform:translateY(-4px)}
+.dock a:active{transform:scale(.94)}
+.dock .d-ic{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--c);box-shadow:0 6px 14px -6px rgba(0,0,0,.6)}
+.dock .d-ic svg{width:22px;height:22px}
+.dock .d-lb{font-size:12px;font-weight:600;line-height:1}
+.dock a.soon{opacity:.45}
+footer{padding-bottom:130px}
+@media (max-width:480px){
+  .dock{left:8px;right:8px;transform:none;justify-content:space-between;gap:0;padding:8px 6px;animation:none}
+  .dock a{min-width:0;flex:1;padding:4px 0}
+  .dock .d-ic{width:40px;height:40px}
+  .dock .d-lb{font-size:10px;letter-spacing:-.01em}
+  .dock a{padding:4px 1px}
+}
 }
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 </style>
@@ -671,10 +685,14 @@ footer .copy{width:100%;border-top:1px solid rgba(255,255,255,.1);padding-top:18
   </div>
 </footer>
 
-<div class="callbar">
-  <a class="btn btn-fire js-call1" href="#">📞 Call</a>
-  <a class="btn btn-ghost" href="#book" style="background:var(--night)">Book</a>
-</div>
+<nav class="dock" aria-label="Quick actions">
+  <a class="js-call1" href="#" style="--c:#22B35E"><span class="d-ic"><svg viewBox="0 0 24 24" fill="#fff"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></span><span class="d-lb">Call</span></a>
+  <a class="js-wa" href="#" target="_blank" rel="noopener" style="--c:#25D366"><span class="d-ic"><svg viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm4.5 12.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.6-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.7.5-.1 1.5-.6 1.7-1.2s.2-1.1.2-1.2-.2-.2-.4-.3z"/></svg></span><span class="d-lb">WhatsApp</span></a>
+  <a class="js-fb" href="#" target="_blank" rel="noopener" style="--c:#1877F2"><span class="d-ic"><svg viewBox="0 0 24 24" fill="#fff"><path d="M14 8h3V4h-3c-2.8 0-4.5 1.8-4.5 4.6V11H7v4h2.5v9h4v-9h3l.5-4h-3.5V9c0-.6.4-1 1-1z"/></svg></span><span class="d-lb">Facebook</span></a>
+  <a class="js-ig" href="#" target="_blank" rel="noopener" style="--c:linear-gradient(45deg,#FEDA75,#FA7E1E,#D62976,#962FBF,#4F5BD5)"><span class="d-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="#fff"/></svg></span><span class="d-lb">Instagram</span></a>
+  <a class="js-map" href="#" target="_blank" rel="noopener" style="--c:linear-gradient(135deg,#F29A2E,#D4213D)"><span class="d-ic"><svg viewBox="0 0 24 24" fill="#fff"><path d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg></span><span class="d-lb">Map</span></a>
+  <a href="#book" style="--c:linear-gradient(135deg,#D4213D,#F29A2E)"><span class="d-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span><span class="d-lb">Book</span></a>
+</nav>
 
 <!-- CONFIRMATION POP-UP -->
 <div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="mTitle">
@@ -688,7 +706,7 @@ footer .copy{width:100%;border-top:1px solid rgba(255,255,255,.1);padding-top:18
       <div class="ticket-body">
         <dl id="ticketList"></dl>
       </div>
-      <p class="ticket-foot">ज्योतिष परामर्श सेवा · ज्यो. चेतन ओली · <span class="js-num1"></span>, <span class="js-num2"></span><br>
+      <p class="ticket-foot">ज्योतिष परामर्श सेवा · ज्यो. चेतन ओली · <span class="js-phones"></span><br>
       Your payment is checked before the meeting. If anything is wrong, you'll get a call on the number you gave.</p>
     </div>
     <div class="modal-actions">
@@ -2658,8 +2676,8 @@ footer .copy{width:100%;border-top:1px solid rgba(255,255,255,.1);padding-top:18
    CONFIG: fill these in. Leave a value as "" if you don't have it yet.
    ===================================================================== */
 const CONFIG = {
-  phone1: "9824036543",
-  phone2: "9814044138",
+  phone1: "9814044138",   // tap-to-call number
+  phone2: "",             // optional second call number (leave "" to hide)
   phoneCountry: "+977",
   whatsapp: "9824679233",  // WhatsApp only (not for calls)
   office: "Bhadrapur Road (bus stand), Birtamode",
@@ -2693,9 +2711,12 @@ const EN_MONTHS = ["January","February","March","April","May","June","July","Aug
 /* ---- contact links ---- */
 const tel = n => `tel:${CONFIG.phoneCountry}${n}`;
 $$(".js-call1").forEach(a => a.href = tel(CONFIG.phone1));
-$$(".js-call2").forEach(a => a.href = tel(CONFIG.phone2));
+if (CONFIG.phone2) $$(".js-call2").forEach(a => a.href = tel(CONFIG.phone2));
+else $$(".js-call2").forEach(a => (a.closest("footer p") || a).remove());
 $$(".js-num1").forEach(e => e.textContent = CONFIG.phone1);
 $$(".js-num2").forEach(e => e.textContent = CONFIG.phone2);
+const PHONES = [CONFIG.phone1, CONFIG.phone2].filter(Boolean).join(", ");
+$$(".js-phones").forEach(e => e.textContent = PHONES);
 function wireSocial(sel, url){ $$(sel).forEach(a => { if (url) a.href = url; else { a.removeAttribute("target"); a.href = "#contact"; a.querySelector("small").textContent = "Link coming soon"; } }); }
 wireSocial(".js-fb", CONFIG.facebook);
 if (CONFIG.whatsapp){
@@ -2869,7 +2890,7 @@ function details(){
     amount: feeText(), method: state.pay==="esewa" ? "eSewa" : "Bank transfer",
     txn_id: $("#txn").value.trim(),
     zoom_link: CONFIG.zoomLink || "Coming soon: the link will be shared before your meeting",
-    astrologer_phone: `${CONFIG.phone1}, ${CONFIG.phone2}`,
+    astrologer_phone: PHONES,
     owner_email: CONFIG.ownerEmail
   };
 }
