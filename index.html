@@ -972,7 +972,7 @@ footer{padding-bottom:130px}
       <a class="js-fb" href="#" target="_blank" rel="noopener">Facebook</a>
       <a class="js-ig" href="#" target="_blank" rel="noopener">Instagram</a>
     </div>
-    <p class="copy">© <span id="yr"></span> Jyotish Paramarsha Sewa · Birtamode, Jhapa</p>
+    <p class="copy">© <span id="yr"></span> Jyotish Paramarsha Sewa · Birtamode, Jhapa · <span style="opacity:.6">v5-Oct</span></p>
   </div>
 </footer>
 
@@ -3251,12 +3251,27 @@ async function notifyOwner(d){
   };
   fd.append("_replyto", d.customer_email);
   for (const [k,v] of Object.entries(rows)) fd.append(k, v || "-");
-  if (shotFile) fd.append("attachment", shotFile, shotFile.name || "payment-screenshot.jpg");
-  try{
-    const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 20000);
-    await fetch(`https://formsubmit.co/${to.trim()}`, { method:"POST", body:fd, mode:"no-cors", signal:ctl.signal });
-    clearTimeout(t); return "ok";
-  } catch(e){ return "fail"; }
+  // Send as a normal web form into a hidden frame (FormSubmit only accepts file uploads this way)
+  return new Promise(resolve => {
+    const frameName = "fs_" + Date.now();
+    const frame = document.createElement("iframe"); frame.name = frameName; frame.hidden = true; frame.title = "booking sender";
+    const form = document.createElement("form");
+    form.action = `https://formsubmit.co/${to.trim()}`; form.method = "POST"; form.enctype = "multipart/form-data"; form.target = frameName; form.hidden = true;
+    for (const [k,v] of fd.entries()){ const i = document.createElement("input"); i.type = "hidden"; i.name = k; i.value = v; form.appendChild(i); }
+    const original = $("#shot"), holder = original.parentNode, next = original.nextSibling;
+    let fileInput = document.createElement("input"); fileInput.type = "file"; fileInput.name = "attachment";
+    try { const dt = new DataTransfer(); dt.items.add(shotFile); fileInput.files = dt.files; }
+    catch(e){ fileInput = original; original.name = "attachment"; }   // older browsers: send the file they picked
+    form.appendChild(fileInput);
+    document.body.append(frame, form);
+    let done = false;
+    const finish = r => { if (done) return; done = true;
+      if (fileInput === original){ original.removeAttribute("name"); holder.insertBefore(original, next); }
+      setTimeout(() => { form.remove(); frame.remove(); }, 3000); resolve(r); };
+    frame.addEventListener("load", () => finish("ok"));
+    setTimeout(() => finish("ok"), 15000);
+    try { form.submit(); } catch(e){ finish("fail"); }
+  });
 }
 
 /* ---- confirm ---- */
