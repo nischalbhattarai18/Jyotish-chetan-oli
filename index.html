@@ -2981,7 +2981,7 @@ const CONFIG = {
   daysAhead: 60,           // how far ahead customers can book
   // EmailJS (free at emailjs.com) sends the emails. See setup notes.
   emailjs: { publicKey: "", serviceId: "", customerTemplateId: "", ownerTemplateId: "" },
-  ownerEmail: "",          // his email: receives every booking + the payment screenshot (via FormSubmit)
+  ownerEmail: "chetanoli7090@gmail.com", // his email: receives every booking + the payment screenshot (via FormSubmit)
   formsubmitId: ""         // optional: the private ID FormSubmit gives after activation (hides his email)
 };
 /* ===================================================================== */
@@ -3229,8 +3229,28 @@ async function notifyOwner(d){
   fd.append("_subject", `New booking ${d.booking_id}: ${d.customer_name}, ${d.date_ad} ${d.time_npt}`);
   fd.append("_captcha", "false"); fd.append("_template", "table");
   const ej = CONFIG.emailjs; if (!(ej.publicKey && ej.serviceId && ej.customerTemplateId)) fd.append("_autoresponse", `Namaste ${d.first_name}, your appointment with Jyotish Chetan Oli is booked. Booking ID: ${d.booking_id}. Date: ${d.date_bs} (${d.date_ad}). Time: ${d.time_npt}. Duration: ${d.duration}. Type: ${d.consult_type}. Fee: ${d.amount} via ${d.method}. Your payment will be checked before the meeting. Questions? Call ${d.astrologer_phone}.`);
-  const rows = {"Booking ID":d.booking_id,"Name":d.customer_name,"Phone":d.customer_phone,"email":d.customer_email,"Nepali date":d.date_bs,"English date":d.date_ad,"Time":d.time_npt,"Duration":d.duration,"Consultation type":d.consult_type,"Topic":d.topic,"Amount":d.amount,"Paid via":d.method,"Transaction ID":d.txn_id || "(not given)"};
-  for (const [k,v] of Object.entries(rows)) fd.append(k, v);
+  const t = ctype();
+  const rows = {
+    "Booking ID": d.booking_id,
+    "First name": d.first_name,
+    "Last name": d.last_name,
+    "Phone (with country code)": d.customer_phone,
+    "email": d.customer_email,           // FormSubmit sends the customer confirmation to this field
+    "Home address (house visit)": t === "house" ? $("#addr").value.trim() : "Not a house visit",
+    "Call on (online)": t === "online" ? $("#app").value : "Not online",
+    "Nepali date (BS)": d.date_bs,
+    "English date (AD)": d.date_ad,
+    "Time (Nepal)": d.time_npt,
+    "Duration": d.duration,
+    "Consultation type": d.consult_type,
+    "Topic": d.topic,
+    "Amount": d.amount,
+    "Paid via": d.method,
+    "Transaction ID": d.txn_id || "(not given)",
+    "Payment screenshot": "Attached to this email"
+  };
+  fd.append("_replyto", d.customer_email);
+  for (const [k,v] of Object.entries(rows)) fd.append(k, v || "-");
   if (shotFile) fd.append("attachment", shotFile, shotFile.name || "payment-screenshot.jpg");
   try{
     const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 20000);

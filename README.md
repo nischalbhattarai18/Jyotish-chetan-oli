@@ -33,7 +33,7 @@ All settings are in one block called `CONFIG`, near the bottom of `index.html`.
 | `feeNPR`, `durationMin` | Consultation fee (rupees, no quotes) and length in minutes | 799, 30 |
 | `esewa` | eSewa ID, name and QR (QR is already built into the file) | 9814044138, Bhawani Pokharel |
 | `bank` | `bankName`, `accountName`, `accountNo`, `branch`, `qr` | Coming soon |
-| `ownerEmail` | His email, receives bookings + payment screenshots | Coming soon |
+| `ownerEmail` | His email, receives bookings + payment screenshots | chetanoli7090@gmail.com |
 | `formsubmitId` | Optional private FormSubmit ID (hides his email) | Empty |
 | `closedWeekdays` | Days with no appointments; empty means all 7 days open | Empty |
 | `slots` | Appointment times, Nepal time | 7 AM to 6 PM |
