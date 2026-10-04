@@ -382,6 +382,9 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--saffron)
 #shotField.bad .drop{border-color:var(--sindoor);background:#FFF0F0}
 .drop.has{border-style:solid;border-color:var(--leaf);background:#F0FAF3}
 
+.saved-img{background:#FFF3D6;border-radius:12px;padding:12px;font-size:14px;color:#5A4200}
+.saved-img img{margin-top:10px;width:100%;border-radius:10px;border:1px solid var(--line);-webkit-touch-callout:default}
+
 /* ---------- MODAL ---------- */
 .modal{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:20px;background:rgba(20,14,50,.7);backdrop-filter:blur(4px)}
 .modal[hidden]{display:none}
@@ -1002,6 +1005,8 @@ footer{padding-bottom:130px}
     <div class="modal-actions">
       <p class="mail-status" id="mailStatus">Sending confirmation email…</p>
       <button class="btn btn-fire" id="dlBtn">⬇ Download confirmation (PDF)</button>
+      <button class="btn btn-line" id="imgBtn">🖼️ Save as image</button>
+      <div class="saved-img" id="savedImg" hidden><p></p><img alt="Your appointment confirmation"></div>
       <button class="btn btn-line" id="closeModal">Close</button>
     </div>
   </div>
@@ -2957,7 +2962,6 @@ footer{padding-bottom:130px}
 }));
 
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
@@ -2981,6 +2985,7 @@ const CONFIG = {
   daysAhead: 60,           // how far ahead customers can book
   // EmailJS (free at emailjs.com) sends the emails. See setup notes.
   emailjs: { publicKey: "", serviceId: "", customerTemplateId: "", ownerTemplateId: "" },
+  appsScriptUrl: "",       // Google Apps Script web-app URL: sends all emails from his Gmail (see README)
   ownerEmail: "chetanoli7090@gmail.com", // his email: receives every booking + the payment screenshot (via FormSubmit)
   formsubmitId: ""         // optional: the private ID FormSubmit gives after activation (hides his email)
 };
@@ -3274,81 +3279,128 @@ async function notifyOwner(d){
   });
 }
 
+/* ---- confirmation ticket, drawn directly on a canvas (fast, works on every phone, Nepali text renders correctly) ---- */
+function wrapLines(g, text, maxW){
+  const words = String(text).split(/\s+/), lines = []; let line = "";
+  for (const w of words){
+    const test = line ? line + " " + w : w;
+    if (g.measureText(test).width > maxW && line){ lines.push(line); line = w; } else line = test;
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+async function drawTicket(d){
+  try { await document.fonts.ready; } catch(e){}
+  const W = 900, pad = 48, F = '"Mukta","Noto Sans Devanagari",system-ui,sans-serif';
+  const rows = [["Booking ID", d.booking_id],["नाम / Name", d.customer_name],["नेपाली मिति", d.date_bs],["English date", d.date_ad],["समय / Time", d.time_npt],["Duration", d.duration],["प्रकार / Type", d.consult_type],["Phone", d.customer_phone],["Email", d.customer_email],["Topic", d.topic],["Paid", `${d.amount} via ${d.method}`],["Payment proof", "Screenshot uploaded" + (d.txn_id ? ` · Txn ${d.txn_id}` : "")]];
+  const m = document.createElement("canvas").getContext("2d"); m.font = `600 26px ${F}`;
+  const valX = pad + 230, valW = W - valX - pad;
+  const laid = rows.map(([k,v]) => ({k, lines: wrapLines(m, v, valW)}));
+  const bodyH = laid.reduce((h,r) => h + r.lines.length*36 + 16, 0);
+  m.font = `500 21px ${F}`;
+  const foot = [`ज्यो. चेतन ओली · Jyotish Chetan Oli · ${PHONES}`, CONFIG.office, "Your payment is checked before the meeting. If anything is wrong, you'll get a call."]
+    .flatMap(t => wrapLines(m, t, W - 2*pad));
+  const H = 250 + 40 + bodyH + 50 + foot.length*32 + 30;
+  const c = document.createElement("canvas"), s = 2; c.width = W*s; c.height = H*s;
+  const g = c.getContext("2d"); g.scale(s,s);
+  g.fillStyle = "#ffffff"; g.fillRect(0,0,W,H);
+  const grad = g.createLinearGradient(0,0,W,250); grad.addColorStop(0,"#1E1650"); grad.addColorStop(1,"#2B1F6B");
+  g.fillStyle = grad; g.fillRect(0,0,W,250);
+  g.fillStyle = "#22B35E"; g.beginPath(); g.arc(W/2, 78, 38, 0, Math.PI*2); g.fill();
+  g.strokeStyle = "#fff"; g.lineWidth = 7; g.lineCap = "round"; g.lineJoin = "round";
+  g.beginPath(); g.moveTo(W/2-16,78); g.lineTo(W/2-4,91); g.lineTo(W/2+18,64); g.stroke();
+  g.textAlign = "center"; g.fillStyle = "#FFC845"; g.font = `700 40px ${F}`; g.fillText("अपोइन्टमेन्ट पक्का भयो", W/2, 168);
+  g.fillStyle = "#CBBFF0"; g.font = `500 24px ${F}`; g.fillText("Appointment confirmed · ज्योतिष परामर्श सेवा", W/2, 210);
+  g.textAlign = "left"; let y = 250 + 50;
+  for (const r of laid){
+    g.fillStyle = "#6C5F80"; g.font = `500 22px ${F}`; g.fillText(r.k, pad, y);
+    g.fillStyle = r.k === "Booking ID" ? "#D4213D" : "#2A1E3F"; g.font = r.k === "Booking ID" ? `800 30px ${F}` : `600 26px ${F}`;
+    r.lines.forEach((ln,i) => g.fillText(ln, valX, y + i*36));
+    y += r.lines.length*36 + 16;
+  }
+  g.strokeStyle = "#EAD9BC"; g.setLineDash([8,8]); g.lineWidth = 2; g.beginPath(); g.moveTo(pad, y+6); g.lineTo(W-pad, y+6); g.stroke(); g.setLineDash([]);
+  g.fillStyle = "#6C5F80"; g.font = `500 21px ${F}`;
+  foot.forEach((t,i) => g.fillText(t, pad, y + 48 + i*32));
+  return c;
+}
+
+/* ---- send booking: Google Apps Script (recommended) or FormSubmit (fallback) ---- */
+const toB64 = blob => new Promise(r => { const fr = new FileReader(); fr.onload = () => r(String(fr.result).split(",")[1]); fr.readAsDataURL(blob); });
+async function sendBooking(d, ticketCanvas){
+  if (CONFIG.appsScriptUrl){
+    try{
+      const ticketBlob = await new Promise(r => ticketCanvas.toBlob(r, "image/jpeg", .85));
+      const payload = { ...d, address: ctype()==="house" ? $("#addr").value.trim() : "", app: ctype()==="online" ? $("#app").value : "",
+        screenshot: await toB64(shotFile), screenshotType: shotFile.type || "image/jpeg", ticket: await toB64(ticketBlob), site: location.href };
+      const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 45000);
+      const res = await fetch(CONFIG.appsScriptUrl, { method:"POST", body: JSON.stringify(payload), headers:{ "Content-Type":"text/plain;charset=utf-8" }, signal: ctl.signal });
+      clearTimeout(t);
+      const out = await res.json().catch(() => ({ ok: res.ok }));
+      return out.ok ? "ok" : "fail";
+    } catch(e){ return "fail"; }
+  }
+  if (CONFIG.formsubmitId || CONFIG.ownerEmail) return notifyOwner(d);
+  return "off";
+}
+
 /* ---- confirm ---- */
+let lastTicket = null;
 $("#confirmBtn").onclick = async () => {
   if (!shotFile){ setErr("shot", "Upload the screenshot of your payment to book."); $("#drop").scrollIntoView({behavior:"smooth",block:"center"}); return; }
   const d = details(), btn = $("#confirmBtn");
-  btn.disabled = true; btn.textContent = "Booking…";
-  const sent = await notifyOwner(d);
+  btn.disabled = true; btn.textContent = "Booking… please wait";
+  lastTicket = await drawTicket(d);
+  const sent = await sendBooking(d, lastTicket);
   btn.disabled = false; btn.textContent = "📅 Book appointment";
   $("#ticketList").innerHTML = `<dt>Booking ID</dt><dd class="ticket-id">${d.booking_id}</dd><dt>नाम / Name</dt><dd>${esc(d.customer_name)}</dd><dt>नेपाली मिति</dt><dd>${d.date_bs}</dd><dt>English date</dt><dd>${d.date_ad}</dd><dt>समय / Time</dt><dd>${d.time_npt}</dd><dt>Duration</dt><dd>${d.duration}</dd><dt>प्रकार / Type</dt><dd style="overflow-wrap:anywhere">${esc(d.consult_type)}</dd><dt>Phone</dt><dd>${esc(d.customer_phone)}</dd><dt>Email</dt><dd>${esc(d.customer_email)}</dd><dt>Topic</dt><dd>${esc(d.topic)}</dd><dt>Paid</dt><dd>${d.amount} via ${d.method}<br><span style="font-weight:400;color:var(--muted)">${d.txn_id ? "Txn: "+esc(d.txn_id)+" · " : ""}Screenshot uploaded ✓</span></dd>`;
+  const st = $("#mailStatus");
+  if (sent === "ok"){ st.className = "mail-status ok"; st.textContent = `✓ Booked! Your confirmation has been emailed to ${d.customer_email} (check Spam too), and Jyotish Chetan Oli has received your booking and payment screenshot.`; }
+  else if (sent === "fail"){ st.className = "mail-status warn"; st.textContent = `Your booking couldn't be sent by email. Please save your confirmation below and call ${PHONES} to confirm.`; }
+  else { st.className = "mail-status warn"; st.textContent = "Email isn't set up yet. Please save your confirmation below and keep it."; }
+  $("#savedImg").hidden = true;
   $$(".step-pill").forEach(p => { p.classList.add("done"); p.classList.remove("active"); });
   $("#modal").hidden = false; $(".modal-card").scrollTop = 0; $("#closeModal").focus({preventScroll:true});
-  sendEmails(d, sent);
 };
-async function sendEmails(d, sent){
-  const st = $("#mailStatus"), c = CONFIG.emailjs;
-  st.className = "mail-status";
-  if (!(window.emailjs && c.publicKey && c.serviceId && c.customerTemplateId)){
-    if (sent === "ok"){ st.className = "mail-status ok"; st.textContent = `✓ Your booking and payment screenshot were sent to Jyotish Chetan Oli. A confirmation is on its way to ${d.customer_email} (check spam too). Please also download it below.`; }
-    else if (sent === "fail"){ st.className = "mail-status warn"; st.textContent = `We couldn't send your booking. Please download the confirmation below and call ${d.astrologer_phone}.`; }
-    else { st.className = "mail-status warn"; st.textContent = "Email isn't set up yet. Please download your confirmation below and keep it."; }
-    return;
-  }
-  st.textContent = "Sending confirmation email…";
-  try{
-    emailjs.init({ publicKey: c.publicKey });
-    await emailjs.send(c.serviceId, c.customerTemplateId, d);
-    if (c.ownerTemplateId && CONFIG.ownerEmail) emailjs.send(c.serviceId, c.ownerTemplateId, d).catch(()=>{});
-    st.className = "mail-status ok"; st.textContent = `✓ Confirmation sent to ${d.customer_email}. Check your spam folder if you don't see it.` + (sent === "ok" ? " Your payment screenshot was sent to Jyotish Chetan Oli." : "");
-  } catch(e){
-    st.className = "mail-status warn"; st.textContent = "The email couldn't be sent. Please download your confirmation below and keep it.";
-  }
-}
 $("#closeModal").onclick = () => { $("#modal").hidden = true; $("#lightbox").hidden = true; };
 $("#modal").addEventListener("click", e => { if (e.target.id === "modal") $("#modal").hidden = true; $("#lightbox").hidden = true; });
 document.addEventListener("keydown", e => { if (e.key === "Escape") { $("#modal").hidden = true; $("#lightbox").hidden = true; } });
 
+/* ---- save confirmation as PDF or image ---- */
+const inApp = /FBAN|FBAV|FB_IAB|Messenger|Instagram|Line\/|WhatsApp/i.test(navigator.userAgent);
 function saveBlob(blob, name){
   const url = URL.createObjectURL(blob), a = document.createElement("a");
   a.href = url; a.download = name; a.rel = "noopener"; document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 4000);
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
 }
-function showImageFallback(dataUrl){
-  let box = $("#imgFallback");
-  if (!box){ box = document.createElement("div"); box.id = "imgFallback"; box.className = "mail-status warn"; $("#dlBtn").after(box); }
-  box.innerHTML = `If the download didn't start, press and hold (or right-click) the image below and choose <b>Save image</b>.<img src="${dataUrl}" alt="Appointment confirmation" style="margin-top:10px;border-radius:10px;border:1px solid var(--line)">`;
+function showSaved(){
+  const box = $("#savedImg"); box.hidden = false;
+  box.querySelector("img").src = lastTicket.toDataURL("image/jpeg", .9);
+  box.querySelector("p").innerHTML = inApp
+    ? "Downloads don't work inside Facebook/Messenger/Instagram. <b>Press and hold the image below and choose Save</b>, or open this site in Chrome or Safari."
+    : "If nothing downloaded, <b>press and hold (or right-click) the image below and choose Save image</b>.";
 }
 $("#dlBtn").onclick = async () => {
+  if (!lastTicket) return;
   const btn = $("#dlBtn"), name = `${state.bookingId}-appointment`;
-  if (!window.html2canvas){ window.print(); return; }
   btn.disabled = true; btn.textContent = "Preparing PDF…";
-  let img;
   try{
-    const canvas = await html2canvas($("#ticket"), { scale: 2, backgroundColor: "#ffffff", useCORS: true,
-      onclone: doc => {
-        // Draw the Nepali heading with the browser's own text engine (html2canvas can overlap Devanagari words)
-        const src = $("#mTitle"), dst = doc.getElementById("mTitle"), cs = getComputedStyle(src), r = src.getBoundingClientRect();
-        const c = doc.createElement("canvas"), k = 3; c.width = r.width*k; c.height = r.height*k;
-        const g = c.getContext("2d"); g.scale(k,k); g.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
-        g.fillStyle = cs.color; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(src.textContent, r.width/2, r.height/2);
-        c.style.width = r.width + "px"; c.style.height = r.height + "px"; c.style.display = "block"; c.style.margin = "0 auto";
-        dst.replaceChildren(c);
-      } });
-    img = canvas.toDataURL("image/jpeg", .92);
-    if (window.jspdf){
-      const pdf = new jspdf.jsPDF({ unit:"pt", format:"a4" });
-      const pw = pdf.internal.pageSize.getWidth() - 80, ph = canvas.height * pw / canvas.width;
-      pdf.addImage(img, "JPEG", 40, 40, pw, ph);
-      saveBlob(pdf.output("blob"), name + ".pdf");
-    } else {
-      canvas.toBlob(b => saveBlob(b, name + ".jpg"), "image/jpeg", .92);
-    }
-    setTimeout(() => showImageFallback(img), 1200);
+    if (!window.jspdf) throw new Error("no pdf library");
+    const pdf = new jspdf.jsPDF({ unit:"pt", format:"a4" });
+    const pw = pdf.internal.pageSize.getWidth() - 60, ph = lastTicket.height * pw / lastTicket.width;
+    pdf.addImage(lastTicket.toDataURL("image/jpeg", .9), "JPEG", 30, 30, pw, Math.min(ph, pdf.internal.pageSize.getHeight()-60));
+    saveBlob(pdf.output("blob"), name + ".pdf");
   } catch(e){
-    if (img) showImageFallback(img); else window.print();
-  } finally { btn.disabled = false; btn.textContent = "⬇ Download confirmation (PDF)"; }
+    lastTicket.toBlob(b => b && saveBlob(b, name + ".jpg"), "image/jpeg", .92);
+  } finally {
+    btn.disabled = false; btn.textContent = "⬇ Download confirmation (PDF)"; showSaved();
+  }
 };
+$("#imgBtn").onclick = () => {
+  if (!lastTicket) return;
+  lastTicket.toBlob(b => b && saveBlob(b, `${state.bookingId}-appointment.jpg`), "image/jpeg", .92);
+  showSaved();
+};
+
 
 /* ---- shortcuts into the booking form ---- */
 $$(".js-fee-num").forEach(e => e.textContent = CONFIG.feeNPR);
